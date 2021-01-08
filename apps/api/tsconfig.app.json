@@ -4,8 +4,11 @@
     "outDir": "../../dist/out-tsc",
     "types": ["node"],
     "emitDecoratorMetadata": true,
-    "target": "es2015"
+    // "target": "es2015"
+    "module": "CommonJS",
+  "target": "esnext",
   },
+
   "exclude": ["**/*.spec.ts"],
   "include": ["**/*.ts"]
 }

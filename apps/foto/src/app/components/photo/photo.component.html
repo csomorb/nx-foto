@@ -1,0 +1,154 @@
+<div class="item">
+  <div class="item-view-container">
+    <picture>
+      <source media="(max-width: 320px)" srcset="{{photoBaseUrl + catService?.curItem?.src320}}">
+      <source *ngIf="catService?.curItem?.src640" media="(max-width: 640px)" srcset="{{photoBaseUrl + catService?.curItem?.src640}}">
+      <source *ngIf="catService?.curItem?.src1280" media="(max-width: 1280px)" srcset="{{photoBaseUrl + catService?.curItem?.src1280}}">
+      <source *ngIf="catService?.curItem?.src1920"  media="(min-width: 1280px)" srcset="{{photoBaseUrl + catService?.curItem?.src1920}}">
+      <img [src]="photoBaseUrl + this.catService?.curItem?.srcOrig" alt="{{ catService?.curItem?.title}}" id="imageToFindFaces" #img
+       [ngStyle]="{'cursor' : tagMode ? 'url(\'/assets/icon/plus.svg\') 16 16,auto' : '' }" (click)="tagNotDetected($event, img)"/>
+    </picture>
+    <app-selectpeople class="select-people" *ngIf="newFace && tagMode" [exeptPeople]="catService?.curItem?.peoples"
+        [ngStyle]="{'top':(newFace.y*img?.height+16)+'px','left':(newFace.x*img?.width)+'px'}" (selectedPeopleID)="setSelectedFace($event,newFace)"></app-selectpeople>
+    <ng-container *ngIf="tagMode">
+      <div *ngFor="let f of catService?.curItem?.facesToTag"
+        class="rect"
+        [style.top] = "img.offsetTop+f.y*img.height+'px'"
+        [style.left] = "img.offsetLeft+f.x*img.width+'px'"
+        [style.width] = "f.w*img.width+'px'"
+        [style.height] = "f.h*img.height+'px'"
+        (click)="f.edit=true">
+        <app-selectpeople class="select-people"  [exeptPeople]="catService?.curItem?.peoples"
+        [ngStyle]="{'top':(f.h*img?.height)+'px'}" *ngIf="f.edit" (selectedPeopleID)="setSelectedFace($event,f)"></app-selectpeople>
+      </div>
+    </ng-container>
+    <ng-container *ngFor="let f of catService?.curItem?.faces">
+      <div [style.top] = "img.offsetTop+f.y*img.height+'px'"
+          [style.left] = "img.offsetLeft+f.x*img.width+'px'"
+          class="absolute">
+        <div *ngIf="tagMode || f.show"
+        (click)="showTagedFace(f.idPeople)"
+        class="box box-taged"
+        [style.width] = "f.w*img.width+'px'"
+        [style.height] = "f.h*img.height+'px'"
+        ><span></span><span></span><span></span><span></span>
+        </div>
+        <app-selectpeople class="select-people"  [defaultSelectedId]="f.idPeople" [exeptPeople]="catService?.curItem?.peoples"
+        [ngStyle]="{'top':(f.h*img?.height)+'px'}" *ngIf="tagMode && f.show" (selectedPeopleID)="setSelectedFace($event,f)"></app-selectpeople>
+      </div>
+    </ng-container>
+  </div>
+  <div class="item-detail">
+    <div class="item-navigation">
+      <div (click)="movePrevPhoto()" class="navigation-item">
+        <img *ngIf="catService?.prevItem && catService?.prevItem.idPhoto" [src]="photoBaseUrl + catService?.prevItem?.src150" alt="Previous item"/>
+        <img *ngIf="catService?.prevItem && catService?.prevItem.idVideo" [src]="photoBaseUrl + '/videos/' +catService?.prevItem?.idVideo + '/t1.jpg'" alt="Previous item"/>
+        <div *ngIf="catService?.prevItem" class="arrow arrow-prev"></div>
+      </div>
+      <div (click)="returnGalery()" class="navigation-item arrow arrow-home">
+      </div>
+      <div (click)="moveNextPhoto()" class="navigation-item">
+        <img *ngIf="catService?.nextItem && catService?.nextItem.idPhoto" [src]="photoBaseUrl + catService?.nextItem?.src150" alt="Next picture"/>
+        <img *ngIf="catService?.nextItem && catService?.nextItem.idVideo" [src]="photoBaseUrl + '/videos/' +catService?.nextItem?.idVideo + '/t1.jpg'" alt="Next item"/>
+        <div *ngIf="catService?.nextItem" class="arrow arrow-next"></div>
+      </div>
+    </div>
+    <div class="item-prop">
+      <div class="action-btn">
+        <div *ngIf="catService.curCat?.coverPhoto?.idPhoto !== this.catService.curItem?.idPhoto" (click)="setCover()" class="btn-i btn-fav"></div>
+        <div *ngIf="catService.curCat?.coverPhoto?.idPhoto === this.catService.curItem?.idPhoto" (click)="unsetCover()" class="btn-i btn-fav-set"></div>
+        <div class="btn-i btn-download" (click)="download()"></div>
+        <!-- <div (click)="face(img,canvas)" class="btn-i btn-calendar"></div> -->
+        <div *ngIf="!catService.geoTagMode" (click)="toGeoMode()" class="btn-i btn-geotag"></div>
+        <div *ngIf="catService.geoTagMode" (click)="cancelGeoMode()" class="btn-i btn-cancel"></div>
+        <div *ngIf="!tagMode" (click)="toTagMode()" class="btn-i btn-people"></div>
+        <div *ngIf="tagMode" (click)="cancelTagMode()" class="btn-i btn-cancel"></div>
+        <div *ngIf="!editMode" (click)="toEditMode()" class="btn-i btn-edit"></div>
+        <div *ngIf="editMode" (click)="cancelEditMode()" class="btn-i btn-cancel"></div>
+      </div>
+      <div class="delete-confirmation" *ngIf="deleteMode">
+        <div>Supprimer la photo {{catService?.curItem?.title}} ?</div>
+        <div  class="delete-conf-button">
+          <div class="btn-i btn-trash" (click)="deletePhoto()"></div>
+          <div class="btn-i btn-cancel" (click)="cancelDeleteMode()"></div>
+        </div>
+      </div>
+      <form (ngSubmit)="updatePhoto()">
+        <div>
+          <span class="prop-name">Titre</span><br/>
+          <span *ngIf="!editMode" class="prop-content">{{catService?.curItem?.title}}</span>
+          <div *ngIf="editMode" class="webflow-style-input">
+            <input name="title" [(ngModel)]="photo.title" required placeholder="Title">
+          </div>
+        </div>
+        <div *ngIf=" editMode || catService?.curItem?.description">
+          <span class="prop-name">Description</span><br/>
+          <span *ngIf="!editMode" class="prop-content">{{catService?.curItem?.description}}</span>
+          <div *ngIf="editMode" class="webflow-style-input">
+            <textarea name="description" [(ngModel)]="photo.description" placeholder="Description"></textarea>
+          </div>
+        </div>
+        <div>
+          <span class="prop-name">Pris le</span><br/>
+          <span *ngIf="!editMode" class="prop-content">{{catService?.curItem?.shootDate | date:'yyyy/MM/dd HH:mm' }}</span>
+          <div *ngIf="editMode" class="webflow-style-input">
+            <input [owlDateTime]="dt1" [owlDateTimeTrigger]="dt1" placeholder="{{catService?.curItem?.shootDate | date:'yyyy/MM/dd HH:mm' }}" [(ngModel)]="photo.shootDate" name="shootDate">
+            <owl-date-time #dt1 [startAt]="photo.shootDate"></owl-date-time>
+          </div>
+        </div>
+        <div *ngIf="editMode" class="flex">
+          <div class="btn-i btn-rotate-left" (click)="rotateLeft()"></div>
+          <div class="btn-i btn-rotate-right" (click)="rotateRight()"></div>
+          <div (click)="toDeleteMode()" class="btn-i btn-trash"></div>
+          <div (click)="updatePhoto()" class="btn-i btn-save btn-align-right"></div>
+        </div>
+      </form>
+      <div>
+        <span class="prop-name">Ajouté le</span><br/>
+        <span class="prop-content">{{catService?.curItem?.createAt | date:'yyyy/MM/dd HH:mm' }}</span>
+      </div>
+      <div>
+        <span class="prop-name">Modifié le</span><br/>
+        <span class="prop-content">{{catService?.curItem?.updatedAt | date:'yyyy/MM/dd HH:mm' }}</span>
+      </div>
+      <div>
+        <span class="prop-name">Poids</span><br/>
+        <span class="prop-content">{{catService?.curItem?.weight | fileSize }}</span>
+      </div>
+      <div *ngIf="catService?.curItem?.alti">
+        <span class="prop-name">Altitude</span><br/>
+        <span class="prop-content">{{catService?.curItem?.alti}} m</span>
+      </div>
+      <div>
+        <span class="prop-name">Dimensions</span><br/>
+        <span class="prop-content">{{catService?.curItem?.width}} x {{catService?.curItem?.height}} pixel</span>
+      </div>
+    </div>
+    <div>
+      <div *ngIf="catService?.curItem?.tags.length || editMode">Tags:</div>
+      <app-selecttag *ngIf="editMode" (selectedTagID)="setSelectedTag($event)"></app-selecttag>
+      <div *ngFor="let t of catService?.curItem?.tags" class="people-container" (click)="gotToTag(t.id)">
+        <div class="people-cover" [ngStyle]="{'background-image': 'url(' + photoBaseUrl + t?.coverPhoto?.src150 + ')'}"></div>
+        <div class="people-name">{{t.title}}</div>
+        <div class="btn-i btn-cancel" *ngIf="editMode" (click)="delteSelectedTag($event,t.id)"></div>
+      </div>
+    </div>
+    <div *ngIf="catService?.curItem?.peoples?.length">
+      Personnes présentes:
+      <div *ngFor="let p of catService?.curItem?.peoples" (mouseenter) ="showTagedFace(p.id)"  (mouseleave) ="hideTagedFace(p.id)" class="people-container" (click)="tagMode ? showFace(p.id) : gotToPeople(p.id)">
+        <div class="people-cover" [ngStyle]="{'background-image': 'url(' + photoBaseUrl + p?.coverPhoto?.src150 + ')'}"></div>
+        <div class="people-name">{{p.title}}</div>
+      </div>
+    </div>
+    <div>
+      Albums:
+      <div class="albums-container">
+        <div *ngFor="let a of catService?.curItem?.albums" class="album-container" (click)="gotToAlbum(a.id)">
+          <div class="album-cover" [ngStyle]="{'background-image': 'url(' + photoBaseUrl + a?.coverPhoto?.src150 + ')'}"></div>
+          <div class="album-name">{{a.title}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

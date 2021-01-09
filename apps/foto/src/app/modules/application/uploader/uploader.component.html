@@ -1,0 +1,54 @@
+<div class="select-album-container">
+  Sélectionnez l'album :
+  <app-selectalbum (selectedAlbum)="setSelectedAlbum($event)" defaultSelectedIdALbum="{{defaultSelectedIdAlbum}}"></app-selectalbum>
+</div>
+
+
+
+<div class="dropzone files-container"
+     dropzone
+     (hovered)="toggleHover($event)"
+     (dropped)="onDrop($event)"
+     [class.hovering]="isHovering">
+     <div class="add-file">
+      <input type='file' (change)="onAddFiles($event)" multiple #addFile class="add-photo-input"/>
+      <div class="btn-i btn-add-picture" (click)="addFile.click()"></div>
+      <div class="add-text">Photos et vidéos</div>
+     </div>
+     <div *ngFor="let file of files" class="file-container" [style.background-color]="file.loaded ? '#3db14e66' : '#313131'">
+      <div *ngIf="!file.loading" class="btn-i btn-cancel" (click)="deleteFile(file.name)"></div>
+      <div class="image-container" >
+        <img [src]="file.data" *ngIf="file.type.includes('image')">
+        <!-- <img [src]="" *ngIf="file.type.includes('video')"> -->
+      </div>
+      <form [formGroup]="file.itemForm" [style.display]="file.loading ? 'none' : 'block'">
+        <div class="webflow-style-input margin-top-m-26">
+          <input formControlName="title" placeholder="Title" #title>
+        </div>
+        <div class="webflow-style-input">
+          <input formControlName="description" placeholder="Description" #descr>
+        </div>
+      </form>
+      <div *ngIf="file.loading">
+          {{title.value | slice:0:14 }}
+      </div>
+      <div *ngIf="file.loaded" class="loaded">LOADED</div>
+      <div *ngIf="file.loading"
+      [style.height]="file.uploadProgress*2.4+'px'"
+      [style.margin-top]="(-file.uploadProgress*2.4)+'px'"
+      class="upload-progress"></div>
+    </div>
+    <div *ngIf="!files.length" class="drop-file-text"> <h3>Déposez vos fichier ici</h3> </div>
+</div>
+
+<div class="progress-container" *ngIf="totalSize">
+  <div class="progressbar-container"><div class="progressbar" [style.width]="(totalUploadedSize * 100 / totalSize)+'%'"></div></div>
+  <div>{{totalUploadedSize | fileSize}} / {{totalSize | fileSize}}</div>
+</div>
+
+<button
+  class="btn btn-success btn-upload"
+  [disabled]="!files"
+  (click)="uploadFiles()">
+  Upload
+</button>

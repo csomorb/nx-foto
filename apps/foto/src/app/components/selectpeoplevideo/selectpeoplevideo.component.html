@@ -1,0 +1,33 @@
+<div class="people-container">
+  <div class="webflow-style-input">
+    <input name="search" type="text" [(ngModel)]="search" (keyup)="searchPeople()" (focus)="displaySearch()" autocomplete="off"/>
+  </div>
+  <div class="btn-i btn-add-people" *ngIf="!exactMatch" (click)="toModeAdd()"></div>
+  <div class="btn-i btn-validate-people" *ngIf="exactMatch" (click)="selectPeople(exactMatch)"></div>
+</div>
+  <div class="people-list" *ngIf="displaySearchRes">
+    <div *ngFor="let p of listPeoplesResult" (click)="selectPeople(p)" class="people-option">
+      <div class="people-cover"  [ngStyle]="{'background-image': 'url(' + photoBaseUrl + p?.coverPhoto?.src150 + ')'}"></div>
+      <div class="people-name">{{p.title}}</div>
+    </div>
+  </div>
+<div class="overlay-add-container" *ngIf="modeAdd">
+  <div class="overlay-form">
+    <div class="webflow-style-input">
+      <input name="title" [(ngModel)]="people.title" required placeholder="Name">
+    </div>
+    <div class="webflow-style-input">
+      <textarea name="description" [(ngModel)]="people.description" required placeholder="Description"></textarea>
+    </div>
+    <div>Date de naissance: </div>
+    <div class="webflow-style-input">
+      <input [owlDateTime]="dtp" [owlDateTimeTrigger]="dtp" placeholder="{{people.birthDay | date:'yyyy/MM/dd'}}" [(ngModel)]="people.birthDay" name="birthDay">
+      <owl-date-time #dtp [pickerType]="'calendar'"></owl-date-time>
+    </div>
+  </div>
+  <div  class="overlay-conf-button">
+    <div class="btn-i btn-cancel" (click)="cancelModeAdd()"></div>
+    <div class="btn-i btn-add-people" (click)="createPeople()" ></div>
+  </div>
+</div>
+

@@ -1,0 +1,27 @@
+<form (ngSubmit)="addAlbum(albumForm.value)" #albumForm="ngForm" class="flex-column">
+  <div class="cadre">
+    <div class="text-cadre">
+      <!-- <p *ngIf="!modeAdd">Sélectionner un album: </p> -->
+      <p *ngIf="modeAdd">Sélectionner l'album parent: </p>
+    </div>
+    <div class="cadre-content">
+      <div *ngIf="!modeAdd" (click)="toModeAdd()" class="btn-i btn-add-album"></div>
+      <div *ngIf="modeAdd" (click)="cancelModeAdd()" class="btn-i btn-cancel"></div>
+      <div class="form-group">
+        <div class="webflow-style-input" >
+          <select name="idAlbum" (change)="changeSelectedAlbum($event)" [(ngModel)]="selectAlbum">
+            <option *ngIf="modeAdd" value="0">------</option>
+            <option *ngFor="let album of listAlbums" value="{{album.id}}">{{album.title}}</option>
+          </select>
+        </div>
+        <div *ngIf="modeAdd" class="webflow-style-input">
+          <input name="title" ngModel required placeholder="Nom de l'album" />
+        </div>
+        <div *ngIf="modeAdd" class="webflow-style-input">
+          <textarea name="description" ngModel placeholder="Descriptif de l'album"></textarea>
+        </div>
+        <div *ngIf="modeAdd" class="btn btn-add" (click)="addAlbum(albumForm.value)"><div class="btn-add-albums"></div>Add album</div>
+      </div>
+    </div>
+  </div>
+</form>

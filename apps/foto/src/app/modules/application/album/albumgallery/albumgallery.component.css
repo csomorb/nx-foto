@@ -1,0 +1,10 @@
+.album-tree-conatiner{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.album-tree-conatiner>div{
+  margin: 5px;
+  cursor: pointer;
+}

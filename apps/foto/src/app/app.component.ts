@@ -1,13 +1,24 @@
 import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Message } from '@nx-foto/api-interfaces';
+import { AuthService } from './services/auth.service';
 
 @Component({
-  selector: 'nx-foto-root',
+  selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  hello$ = this.http.get<Message>('/api/hello');
-  constructor(private http: HttpClient) {}
+  title = 'foto';
+  currentYear = new Date().getFullYear();
+  showMobilNav = false;
+
+  constructor(public authService:AuthService){}
+
+  showHideMobilNav(){
+    this.showMobilNav = !this.showMobilNav;
+  }
+
+  logout(){
+    this.authService.logout();
+  }
+
 }

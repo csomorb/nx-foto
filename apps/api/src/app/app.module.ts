@@ -38,10 +38,10 @@ import { VideoModule } from './video/video.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'foto'),
     }),
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(process.mainModule['path'], 'files'),
-    //   serveRoot: '/files',
-    // }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.mainModule['path'], '..', '..', '..', 'files'),
+      serveRoot: '/files',
+    }),
     AlbumModule,
     PhotoModule,
     TagModule,

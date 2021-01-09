@@ -1,0 +1,10 @@
+.register-container{
+  display: flex;
+  align-items: center;
+  height: 100%;
+  justify-content: center;
+}
+
+.register-container>div{
+  max-width: 400px;
+}

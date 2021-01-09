@@ -1,8 +1,57 @@
-<div style="text-align: center">
-  <h1>Welcome to foto!</h1>
-  <img
-    width="450"
-    src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png"
-  />
+<nav>
+  <div class="nav-deskop">
+    <div class="nav-left">
+      <div class="nav-item">
+        <a href="/albums" routerLink="/albums">Albums</a>
+      </div>
+      <div class="nav-item">
+        <a href="/upload" routerLink="/upload">Ajouter des photos</a>
+      </div>
+      <div class="nav-item">
+        <a href="/peoples" routerLink="/peoples">Peoples</a>
+      </div>
+      <div class="nav-item">
+        <a href="/tags" routerLink="/tags">Tags</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-item" *ngIf="!authService.currentUserValue">
+        <a href="/login" routerLink="/login">Connexion</a>
+      </div>
+      <div class="nav-item" *ngIf="authService.currentUserValue">
+        <a href="/user" routerLink="/user" class="user-name">{{authService.currentUserValue.username}}</a> <a href="/login" routerLink="/login" (click)="logout()">Déconnexion</a>
+      </div>
+    </div>
+  </div>
+  <div class="nav-mobil">
+    <div class="nav-mobil-icon" (click)="showHideMobilNav()">
+
+    </div>
+    <div class="nav-mobil-content" *ngIf="showMobilNav">
+      <div class="nav-item">
+        <a href="/albums" routerLink="/albums">Albums</a>
+      </div>
+      <div class="nav-item">
+        <a href="/upload" routerLink="/upload">Ajouter des photos</a>
+      </div>
+      <div class="nav-item">
+        <a href="/peoples" routerLink="/peoples">Peoples</a>
+      </div>
+      <div class="nav-item">
+        <a href="/tags" routerLink="/tags">Tags</a>
+      </div>
+      <div class="nav-item" *ngIf="!authService.currentUserValue">
+        <a href="/login" routerLink="/login">Connexion</a>
+      </div>
+      <div class="nav-item" *ngIf="authService.currentUserValue">
+        <a href="/login" routerLink="/login">Déconnexion</a>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="content">
+  <router-outlet></router-outlet>
+  <app-map></app-map>
 </div>
-<div>Message: {{ hello$ | async | json }}</div>
+
+<footer><small>&copy; Copyright {{currentYear}}, Barna </small></footer>

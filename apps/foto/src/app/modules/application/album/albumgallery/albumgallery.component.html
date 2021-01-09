@@ -1,0 +1,208 @@
+<div class="album-tree-conatiner">
+  <div (click)="goToAlbum(0)"> Acceuil </div>
+  <ng-container *ngFor="let album of catService.parentList">
+    > <div (click)="goToAlbum(album.id)"> {{album.title}}</div>
+  </ng-container>
+  <div *ngIf="catService?.curCat?.id !== 0"> > {{catService?.curCat?.title}} </div>
+</div>
+
+
+<h2 *ngIf="!editMode">{{catService?.curCat?.title}}</h2>
+<p class="album-desc" *ngIf="!editMode">{{catService?.curCat?.description}}</p>
+<form (ngSubmit)="updateAlbum()" *ngIf="editMode" >
+  <div class="modif-album-container">
+    <div class="webflow-style-input">
+      <input name="title" [(ngModel)]="album.title" required placeholder="Title">
+    </div>
+    <div class="webflow-style-input">
+      <textarea name="description" [(ngModel)]="album.description" required placeholder="Description"></textarea>
+    </div>
+    <div (click)="updateAlbum()" class="btn-i btn-save btn-align-right"></div>
+  </div>
+</form>
+
+<div class="action-conatiner">
+  <div class="select-all" *ngIf="editMode">
+    <div class="check-container">
+      <input type="checkbox" [(ngModel)]="masterSelected" name="list_name" value="m1" (change)="checkUncheckAll()"/>
+      <label for="list_name"><div></div></label>
+    </div>
+    <div (click)="checkUncheckAll()">Select/ Unselect All</div>
+  </div>
+  <div class="time-line" *ngIf="timeMode && curTimeLevel==='YEAR'"><span (click)="toAllYears()">Date de création</span></div>
+  <div class="time-line" *ngIf="timeMode && curTimeLevel==='MONTH'"><span (click)="toAllYears()">Date de création</span> / <span (click)="goToYear(curYear)">{{curYear}}</span></div>
+  <div class="time-line" *ngIf="timeMode && curTimeLevel==='DAY'"><span (click)="toAllYears()">Date de création</span> / <span (click)="goToYear(curYear)">{{curYear}}</span> / <span (click)="goToMonth(curYear, curMonth)">{{curMonth | month}}</span></div>
+  <div class="time-line" *ngIf="timeMode && curTimeLevel==='DAY-SELECT'"><span (click)="toAllYears()">Date de création</span> / <span (click)="goToYear(curYear)">{{curYear}}</span> / <span (click)="goToMonth(curYear, curMonth)">{{curMonth | month}}</span> / {{curDay}}</div>
+  <div class="nb-selected" *ngIf="editMode">
+    {{nbSelectedItem}} / {{catService.curItems.length}}
+  </div>
+  <div class="btn-i btn-calendar" (click)="toTimeMode()" *ngIf="!timeMode"></div>
+  <div class="btn-i btn-folder" (click)="cancelTimeMode()" *ngIf="timeMode"></div>
+  <div class="btn-i btn-sort" (click)="toTriMode()" *ngIf="!triMode"></div>
+  <div class="btn-i btn-cancel" (click)="cancelTriMode()" *ngIf="triMode"></div>
+  <div class="btn-i btn-add-picture" (click)="addPhoto()"></div>
+  <div class="btn-i btn-trash" (click)="toDeleteMode()"></div>
+  <div class="btn-i btn-download" (click)="download()" *ngIf="!editMode || (editMode && nbSelectedItem)"></div>
+  <div class="btn-i btn-edit" (click)="toEditMode()" *ngIf="!editMode"></div>
+  <div class="btn-i btn-cancel" (click)="cancelEditMode()" *ngIf="editMode"></div>
+</div>
+<div class="delete-confirmation" *ngIf="deleteMode">
+  <div>Supprimer l'album {{catService?.curCat?.title}} ?</div>
+  <div  class="delete-conf-button">
+    <div class="btn-i btn-trash" (click)="deleteAlbum()"></div>
+    <div class="btn-i btn-cancel" (click)="cancelDeleteMode()"></div>
+  </div>
+</div>
+<div class="delete-confirmation" *ngIf="deleteMultipleMode">
+  <div>Supprimer les {{nbSelectedItem}} éléments?</div>
+  <div  class="delete-conf-button">
+    <div class="btn-i btn-trash" (click)="deleteMultiple()"></div>
+    <div class="btn-i btn-cancel" (click)="cancelDeletMultipleMode()"></div>
+  </div>
+</div>
+<div *ngIf="triMode" class="btn-group tri">
+  <div (click)="triPriseDeVueAncienRecent()" class="btn">Tri prise de vu ancien -> récent</div>
+  <div (click)="triPriseDeVueRecentAncien()" class="btn">Tri prise de vu récent -> ancien</div>
+  <div (click)="triAZ()" class="btn">Tri A -> Z</div>
+  <div (click)="triZA()" class="btn">Tri Z -> A</div>
+</div>
+
+
+
+  <!--Affichage des sous albums-->
+  <div class="album-container" *ngIf="!timeMode">
+    <div *ngFor="let ssAlbum of catService?.curCat?.listAlbum" class="ss-album" (click)="goToCategory(ssAlbum.id)">
+      <img *ngIf="ssAlbum.coverPhoto" [src]="photoBaseUrl + ssAlbum.coverPhoto?.src150" />
+      <div *ngIf="!ssAlbum.coverPhoto" class="empty-album"></div>
+      <div class="album-title" [ngClass]="{'marquee-rtl' : ssAlbum.title.length > 17}"><div>{{ssAlbum.title}}</div></div>
+    </div>
+  </div>
+
+  <div *ngIf="timeMode" class="times-container">
+    <ng-container *ngIf="curTimeLevel === 'YEAR'">
+      <div *ngFor="let y of catService.timeYears" class="time-container" (click)="goToYear(y)">{{y}}</div>
+    </ng-container>
+    <ng-container *ngIf="curTimeLevel === 'MONTH'">
+      <div *ngIf="prevYear" (click)="goToYear(prevYear)" class="move-left-date">&lt;&lt; {{prevYear}}</div>
+      <div *ngIf="!prevYear" class="move-left-date"></div>
+      <ng-container *ngFor="let d of catService.timeMonths" >
+        <div *ngIf="d.y === curYear" class="time-container" (click)="goToMonth(d.y,d.m)">{{d.m | month}} </div>
+      </ng-container>
+      <div *ngIf="nextYear" (click)="goToYear(nextYear)" class="move-right-date"> {{nextYear}} &gt;&gt;</div>
+      <div *ngIf="!nextYear" class="move-right-date"></div>
+    </ng-container>
+    <ng-container *ngIf="curTimeLevel === 'DAY'">
+      <div *ngIf="prevYear" (click)="goToMonth(prevYear,prevMonth)" class="move-left-date">&lt;&lt; {{prevYear}} {{prevMonth | month}}</div>
+      <div *ngIf="!prevYear" class="move-left-date"></div>
+      <ng-container *ngFor="let d of catService.timeDays" >
+        <div *ngIf="d.y === curYear && d.m === curMonth" class="time-container" (click)="goToDay(d.y,d.m,d.d)">{{d.d}} </div>
+      </ng-container>
+      <div *ngIf="nextYear" (click)="goToMonth(nextYear, nextMonth)" class="move-right-date"> {{nextYear}} {{nextMonth | month}} &gt;&gt;</div>
+      <div *ngIf="!nextYear" class="move-right-date"></div>
+    </ng-container>
+    <ng-container *ngIf="curTimeLevel === 'DAY-SELECT'">
+      <div *ngIf="prevYear" (click)="goToDay(prevYear,prevMonth,prevDay)" class="move-left-date">&lt;&lt; {{prevYear}} {{prevMonth | month}} {{prevDay}} </div>
+      <div *ngIf="!prevYear" class="move-left-date"></div>
+      <ng-container *ngFor="let d of catService.timeDays" >
+        <div *ngIf="d.y === curYear && d.m === curMonth" class="time-container" (click)="goToDay(d.y,d.m,d.d)">{{d.d}} </div>
+      </ng-container>
+      <div *ngIf="nextYear" (click)="goToDay(nextYear, nextMonth, nextDay)" class="move-right-date"> {{nextYear}} {{nextMonth | month}} {{nextDay}} &gt;&gt;</div>
+      <div *ngIf="!nextYear" class="move-right-date"></div>
+    </ng-container>
+  </div>
+
+  <div class="flexbin" *ngIf="!editMode">
+    <ng-container *ngFor="let item of catService?.curItems | slice : (currentPage-1) * nbItemPerPage : currentPage * nbItemPerPage">
+      <div *ngIf="item.idPhoto" (click)="loadItem(item)" class="photo-i">
+        <img [src]="photoBaseUrl + item.src640"/>
+        <div class="photo-title">{{item.title}}</div>
+      </div>
+      <div *ngIf="item.idVideo" (click)="loadItem(item)" class="video-i">
+        <img [src]="photoBaseUrl + '/videos/'+item.idVideo+'/t1.jpg'" class="tt"/>
+        <img [src]="photoBaseUrl + '/videos/'+item.idVideo+'/t2.jpg'" class="tt"/>
+        <img [src]="photoBaseUrl + '/videos/'+item.idVideo+'/t3.jpg'" class="tt"/>
+        <img [src]="photoBaseUrl + '/videos/'+item.idVideo+'/t4.jpg'" class="tt"/>
+        <img [src]="photoBaseUrl + '/videos/'+item.idVideo+'/t1.jpg'" class="nn"/>
+        <div class="photo-title">{{item.title}}</div>
+        <div class="video-item"></div>
+      </div>
+  </ng-container>
+  </div>
+
+  <div class="photo-edit-container" *ngIf="editMode">
+
+    <div *ngFor="let item of selectedItems | slice : (currentPage-1) * nbItemPerPage : currentPage * nbItemPerPage" class="edit-container" [ngClass]="{'photo-selected' : item.isSelected}" >
+      <div *ngIf="item.deleteMode" class="delete-conf">
+        <div>Supprimer {{item.title}} ?</div>
+        <div class="delete-conf-button">
+          <div class="btn-i btn-trash" (click)="deleteConfItem(item)"></div>
+          <div class="btn-i btn-cancel" (click)="deleteCancelItem(item)"></div>
+        </div>
+      </div>
+      <div class="image-edit" [ngStyle]="{'background-image': item.idPhoto ? 'url('+ photoBaseUrl + item.src320 + ')' : 'url('+ photoBaseUrl + '/videos/'+item.idVideo + '/t2.jpg)'}" (click)="selectItem(item)">
+        <div class="edit-photo-btn-container">
+          <div *ngIf="item.idPhoto && catService?.curCat?.coverPhoto?.idPhoto !== item.idPhoto" (click)="setCover(item)" class="btn-i btn-fav" click-stop-propagation></div>
+          <div *ngIf="item.idPhoto && catService?.curCat?.coverPhoto?.idPhoto === item.idPhoto" (click)="unsetCover(item)" class="btn-i btn-fav-set" click-stop-propagation></div>
+          <div (click)="updateItem(item)" class="btn-i btn-save" *ngIf="title.dirty || description.dirty" click-stop-propagation></div>
+          <div [owlDateTimeTrigger]="dt2" class="btn-i btn-calendar"></div>
+          <owl-date-time #dt2 [startAt]="item.shootDate"  (afterPickerClosed)="updateItemDate(item, dateInput.classList.contains('ng-dirty'))"></owl-date-time>
+          <input [owlDateTime]="dt2" placeholder="Date Time" [(ngModel)]="item.shootDate" name="shootDate" class="hiden-input" #dateInput>
+          <div class="btn-i btn-trash" (click)="deleteItem(item)" click-stop-propagation></div>
+        </div>
+      </div>
+      <div class="image-detail" (click)="selectItem(item)">
+        {{item.weight | fileSize }}<br/>
+        {{item.width}} x {{item.height}} px<br/>
+        {{item.shootDate |date:'yyyy/MM/dd HH:mm' }}
+      </div>
+      <div class="check-container">
+        <input type="checkbox" name="check{{item.id}}" [(ngModel)]="item.isSelected" value="{{item.id}}" (change)="isAllSelected()">
+        <label for="check{{item.id}}"><div></div></label>
+      </div>
+      <div class="webflow-style-input">
+        <input name="title" [(ngModel)]="item.title" required placeholder="Title" #title="ngModel">
+      </div>
+      <div class="webflow-style-input">
+        <textarea name="description" [(ngModel)]="item.description" required placeholder="Description" #description="ngModel"></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="page-navigation-conatiner" *ngIf="catService?.curItems?.length > nbItemPerPage">
+    <div *ngIf="currentPage > 1" (click)="goToPage(currentPage-1)" class="page-next-prev">&lt;&lt;</div>
+    <div *ngFor="let i of [].constructor((catService?.curItems?.length - catService?.curItems?.length % nbItemPerPage) / nbItemPerPage + 1); let page = index"
+      (click)="goToPage(page+1)" class="page-number" [ngClass]="{'page-selected': currentPage === page +1}">
+        {{ page + 1 }}
+    </div>
+    <div *ngIf="catService?.curItems?.length > nbItemPerPage * (currentPage-1) + nbItemPerPage" (click)="goToPage(currentPage+1)">&gt;&gt;</div>
+  </div>
+
+  <div *ngIf="editMode && nbSelectedItem" class="action-container">
+    <div class="btn-i btn-rotate-left" (click)="rotateLeft()"></div>
+    <div class="btn-i btn-rotate-right" (click)="rotateRight()"></div>
+    <div class="btn-i btn-download" (click)="download()"></div>
+    <div *ngIf="!catService.geoTagMode" (click)="toGeoMode()" class="btn-i btn-geotag"></div>
+    <div *ngIf="catService.geoTagMode" (click)="cancelGeoMode()" class="btn-i btn-cancel"></div>
+    <div class="btn-i btn-trash" (click)="toDeletMultipleMode()"></div>
+    <div class="move-photo">
+      Déplacer vers l'album:
+      <app-selectalbum (selectedAlbum)="setSelectedAlbumToMove($event)" exeptIdAlbum="{{catService?.curCat?.id}}"></app-selectalbum>
+      <div class="btn  btn-align-right" (click)="moveToAlbum()">Déplacer</div>
+    </div>
+    <div class="move-photo">
+      Associer à l'album:
+      <app-selectalbum (selectedAlbum)="setSelectedAlbumToCopy($event)" exeptIdAlbum="{{catService?.curCat?.id}}"></app-selectalbum>
+      <div class="btn btn-align-right" (click)="copyToAlbum()">Associer</div>
+    </div>
+  </div>
+
+  <div *ngIf="catService?.curCat?.id && catService?.curItems">
+    Liste des personnes présentes:
+    <div class="people-list-container">
+      <div *ngFor="let p of catService?.curItems | finduniqpeople" (click)="gotToPeople(p.id)" class="people-container">
+        <div class="people-cover" [ngStyle]="{'background-image': 'url(' + photoBaseUrl + p?.coverPhoto?.src150 + ')'}"></div>
+        <div class="people-name">{{p.title}}</div>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,123 @@
+<div class="item">
+  <div class="item-view-container">
+    <video controls class="video" #video>
+
+      <source [src]="videoBaseUrl + idVideo + '/' + idVideo + '.mp4'"
+              type="video/mp4">
+
+      Sorry, your browser doesn't support embedded videos.
+    </video>
+  </div>
+  <div class="item-detail">
+    <div class="item-navigation">
+      <div (click)="movePrevItem()" class="navigation-item">
+        <img *ngIf="catService?.prevItem && catService?.prevItem.idPhoto" [src]="photoBaseUrl + catService?.prevItem?.src150" alt="Previous item"/>
+        <img *ngIf="catService?.prevItem && catService?.prevItem.idVideo" [src]="photoBaseUrl + '/videos/' +catService?.prevItem?.idVideo + '/t1.jpg'" alt="Previous item"/>
+        <div *ngIf="catService?.prevItem" class="arrow arrow-prev"></div>
+      </div>
+      <div (click)="returnGalery()" class="navigation-item arrow arrow-home">
+      </div>
+      <div (click)="moveNextItem()" class="navigation-item">
+        <img *ngIf="catService?.nextItem && catService?.nextItem.idPhoto" [src]="photoBaseUrl + catService?.nextItem?.src150" alt="Next picture"/>
+        <img *ngIf="catService?.nextItem && catService?.nextItem.idVideo" [src]="photoBaseUrl + '/videos/' +catService?.nextItem?.idVideo + '/t1.jpg'" alt="Next item"/>
+        <div *ngIf="catService?.nextItem" class="arrow arrow-next"></div>
+      </div>
+    </div>
+    <div class="photo-prop">
+      <div class="action-btn">
+
+        <div class="btn-i btn-download" (click)="download()"></div>
+        <!-- <div (click)="face(img,canvas)" class="btn-i btn-calendar"></div> -->
+        <div *ngIf="!catService.geoTagMode" (click)="toGeoMode()" class="btn-i btn-geotag"></div>
+        <div *ngIf="catService.geoTagMode" (click)="cancelGeoMode()" class="btn-i btn-cancel"></div>
+        <div *ngIf="!tagMode" (click)="toTagMode()" class="btn-i btn-people"></div>
+        <div *ngIf="tagMode" (click)="cancelTagMode()" class="btn-i btn-cancel"></div>
+        <div *ngIf="!editMode" (click)="toEditMode()" class="btn-i btn-edit"></div>
+        <div *ngIf="editMode" (click)="cancelEditMode()" class="btn-i btn-cancel"></div>
+      </div>
+      <div class="delete-confirmation" *ngIf="deleteMode">
+        <div>Supprimer la vidéo {{catService?.curItem?.title}} ?</div>
+        <div  class="delete-conf-button">
+          <div class="btn-i btn-trash" (click)="deleteVideo()"></div>
+          <div class="btn-i btn-cancel" (click)="cancelDeleteMode()"></div>
+        </div>
+      </div>
+      <form (ngSubmit)="updateVideo()">
+        <div>
+          <span class="prop-name">Titre</span><br/>
+          <span *ngIf="!editMode" class="prop-content">{{catService?.curItem?.title}}</span>
+          <div *ngIf="editMode" class="webflow-style-input">
+            <input name="title" [(ngModel)]="video.title" required placeholder="Title">
+          </div>
+        </div>
+        <div *ngIf=" editMode || catService?.curItem?.description">
+          <span class="prop-name">Description</span><br/>
+          <span *ngIf="!editMode" class="prop-content">{{catService?.curItem?.description}}</span>
+          <div *ngIf="editMode" class="webflow-style-input">
+            <textarea name="description" [(ngModel)]="video.description" placeholder="Description"></textarea>
+          </div>
+        </div>
+        <div>
+          <span class="prop-name">Pris le</span><br/>
+          <span *ngIf="!editMode" class="prop-content">{{catService?.curItem?.shootDate | date:'yyyy/MM/dd HH:mm' }}</span>
+          <div *ngIf="editMode" class="webflow-style-input">
+            <input [owlDateTime]="dt1" [owlDateTimeTrigger]="dt1" placeholder="{{catService?.curItem?.shootDate | date:'yyyy/MM/dd HH:mm' }}" [(ngModel)]="video.shootDate" name="shootDate">
+            <owl-date-time #dt1 [startAt]="video.shootDate"></owl-date-time>
+          </div>
+        </div>
+        <div *ngIf="editMode" class="flex">
+          <div (click)="toDeleteMode()" class="btn-i btn-trash"></div>
+          <div (click)="updateVideo()" class="btn-i btn-save btn-align-right"></div>
+        </div>
+      </form>
+      <div>
+        <span class="prop-name">Ajouté le</span><br/>
+        <span class="prop-content">{{catService?.curItem?.createAt | date:'yyyy/MM/dd HH:mm' }}</span>
+      </div>
+      <div>
+        <span class="prop-name">Modifié le</span><br/>
+        <span class="prop-content">{{catService?.curItem?.updatedAt | date:'yyyy/MM/dd HH:mm' }}</span>
+      </div>
+      <div>
+        <span class="prop-name">Poids</span><br/>
+        <span class="prop-content">{{catService?.curItem?.weight | fileSize }}</span>
+      </div>
+      <!-- <div *ngIf="catService?.curItem?.alti">
+        <span class="prop-name">Altitude</span><br/>
+        <span class="prop-content">{{catService?.curItem?.alti}} m</span>
+      </div> -->
+      <div>
+        <span class="prop-name">Dimensions</span><br/>
+        <span class="prop-content">{{catService?.curItem?.width}} x {{catService?.curItem?.height}} pixel</span>
+      </div>
+    </div>
+    <div>
+      <div *ngIf="catService?.curItem?.tags.length || editMode">Tags:</div>
+      <app-selecttag *ngIf="editMode" (selectedTagID)="setSelectedTag($event)"></app-selecttag>
+      <div *ngFor="let t of catService?.curItem?.tags" class="people-container" (click)="gotToTag(t.id)">
+        <div class="people-cover" [ngStyle]="{'background-image': 'url(' + photoBaseUrl + t?.coverPhoto?.src150 + ')'}"></div>
+        <div class="people-name">{{t.title}}</div>
+        <div class="btn-i btn-cancel" *ngIf="editMode" (click)="delteSelectedTag($event,t.id)"></div>
+      </div>
+    </div>
+
+    <div>
+      <div *ngIf="catService?.curItem?.tags.length || tagMode">Personnes présentes</div>
+      <app-selectpeoplevideo (selectedPeopleID)="setSelectedFace($event)" *ngIf="tagMode"></app-selectpeoplevideo>
+      <div *ngFor="let p of catService?.curItem?.peoples" class="people-container" (click)="gotToPeople(p.id)">
+        <div class="people-cover" [ngStyle]="{'background-image': 'url(' + photoBaseUrl + p?.coverPhoto?.src150 + ')'}"></div>
+        <div class="people-name">{{p.title}}</div>
+        <div class="btn-i btn-cancel" *ngIf="tagMode" (click)="unsetSelectedFace($event,p.id)"></div>
+      </div>
+    </div>
+
+
+    <!-- <div *ngIf="catService?.curItem?.peoples?.length">
+      Personnes présentes:
+      <div *ngFor="let p of catService?.curItem?.peoples" (mouseenter) ="showTagedFace(p.id)"  (mouseleave) ="hideTagedFace(p.id)" class="people-container" (click)="tagMode ? showFace(p.id) : gotToPeople(p.id)">
+        <div class="people-cover" [ngStyle]="{'background-image': 'url(' + photoBaseUrl + p?.coverPhoto?.src150 + ')'}"></div>
+        <div class="people-name">{{p.title}}</div>
+      </div>
+    </div> -->
+  </div>
+</div>

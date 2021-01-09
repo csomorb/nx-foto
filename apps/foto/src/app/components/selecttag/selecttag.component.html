@@ -1,0 +1,27 @@
+<div class="tag-container">
+  <div class="webflow-style-input">
+    <input name="search" type="text" [(ngModel)]="search" (keyup)="searchTag()" (focus)="displaySearch()" autocomplete="off"/>
+  </div>
+  <div class="btn-i btn-add-tag" *ngIf="!exactMatch" (click)="toModeAdd()"></div>
+  <div class="btn-i btn-validate-tag" *ngIf="exactMatch" (click)="selectTag(exactMatch)"></div>
+</div>
+  <div class="tag-list" *ngIf="displaySearchRes">
+    <div *ngFor="let p of listTagsResult" (click)="selectTag(p)" class="tag-option">
+      <div class="tag-cover"  [ngStyle]="{'background-image': 'url(' + photoBaseUrl + p?.coverPhoto?.src150 + ')'}"></div>
+      <div class="tag-name">{{p.title}}</div>
+    </div>
+  </div>
+<div class="overlay-add-container" *ngIf="modeAdd">
+  <div class="overlay-form">
+    <div class="webflow-style-input">
+      <input name="title" [(ngModel)]="tag.title" required placeholder="Name">
+    </div>
+    <div class="webflow-style-input">
+      <textarea name="description" [(ngModel)]="tag.description" required placeholder="Description"></textarea>
+    </div>
+  </div>
+  <div  class="overlay-conf-button">
+    <div class="btn-i btn-cancel" (click)="cancelModeAdd()"></div>
+    <div class="btn-i btn-add-tag" (click)="createTag()" ></div>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+.tag-option{
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 2px;
+  background: #013858d9;
+  border: 1px solid #1f748054;
+}
+
+.tag-name{
+  margin-left: 5px;
+}
+
+.tag-list{
+  max-height: 250px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.tag-cover{
+  background-color: rgba(173, 173, 173, 0.541);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.webflow-style-input input{
+  line-height: 1.4rem;
+}
+
+.tag-container{
+  display: flex;
+}

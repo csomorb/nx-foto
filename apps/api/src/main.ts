@@ -14,6 +14,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({transform: true}));
 
   const globalPrefix = 'api';
+  app.enableCors();
   app.setGlobalPrefix(globalPrefix);
   const port = process.env.PORT || 3333;
 
